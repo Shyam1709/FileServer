@@ -8,20 +8,20 @@ public class FileClient {
 
 	public final static int SOCKET_PORT = 13267;      // we can change this
 	public final static String SERVER = "localhost";  // localhost
-	public final static String FILE_TO_RECEIVED = "/home/kls102/clientStorage/tas.png";
+	public final static String FILE_TO_RECEIVED = "/home/kls102/clientStorage/abc.png";
 	public final static String FILE_TO_SEND = "/home/kls102/Documents/Git.png";  // you may change this
-																														
+
 
 	public final static int FILE_SIZE = 6022386; // file size is temporary hard coded
-																				
+
 
 	public static void main (String [] args ) throws IOException {
 		FileClient fc = new FileClient();
-	   fc.sendFile();
+		fc.sendFile();
 	}
 
 	public void recieveFile() throws IOException{
-	int bytesRead;
+		int bytesRead;
 		int current = 0;
 		FileOutputStream fos = null;
 		BufferedOutputStream bos = null;
@@ -48,22 +48,16 @@ public class FileClient {
 			bos.flush();
 			System.out.println("File " + FILE_TO_RECEIVED
 					+ " downloaded (" + current + " bytes read)");
-		}
-		finally {
-			if (fos != null) fos.close();
-			if (bos != null) bos.close();
-			if (sock != null) sock.close();
-		}
+		}catch(Exception e){}
 	}
 
-	  public void sendFile() throws IOException{
-  	FileInputStream fis = null;
+	public void sendFile() throws IOException{
+		FileInputStream fis = null;
 		BufferedInputStream bis = null;
 		OutputStream os = null;;
 		Socket sock = null;
 		try {
 			sock = new Socket(SERVER, SOCKET_PORT);
-			while (true) {
 				System.out.println("Waiting...");
 				try {
 					System.out.println("Accepted connection : " + sock);
@@ -80,15 +74,10 @@ public class FileClient {
 					os.write(mybytearray,0,mybytearray.length);
 					os.flush();
 					System.out.println("Done.");
-				}
-				finally {
-					if (bis != null) bis.close();
-					if (os != null) os.close();
-					if (sock!=null) sock.close();
-				}
-			}
+				}catch(Exception e){}
+				
 		}catch(Exception e){}
 
-  }
+	}
 
 }

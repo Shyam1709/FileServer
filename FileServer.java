@@ -6,20 +6,20 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-public class FileServer {
+public class FileServer extends Thread {
 
   private ServerSocket serverSocket;
 	public final static int SOCKET_PORT = 13267;  // you may change this
 	public final static String FILE_TO_SEND = "/home/kls102/Documents/Git.png";  // you may change this
-	public final static String FILE_TO_RECEIVED = "/home/kls102/clientStorage/apx.png";
+	public final static String FILE_TO_RECEIVED = "/home/kls102/clientStorage/bpy.png";
 	public final static int FILE_SIZE = 6022386; // file size is temporary hard coded
 	public final static String SERVER = "localhost";  // localhost
 
 
-
 	public static void main (String [] args ) throws IOException {
 		FileServer fs= new FileServer(SOCKET_PORT);
-		fs.recieveFile();		
+		// fs.recieveFile();	
+		fs.start();	
 	}
 
 	public FileServer(int port) {
@@ -30,19 +30,20 @@ public class FileServer {
 		}
 	}
 
-  public void sendFile() throws IOException{
+	public void run() {
+	try{	
+  Socket clientSocket = serverSocket.accept(); 
+  recieveFile(clientSocket);
+}catch(Exception e){}
+	}
+
+  public void sendFile(Socket clientSocket) throws IOException{
   	FileInputStream fis = null;
 		BufferedInputStream bis = null;
 		OutputStream os = null;
-		ServerSocket servsock = null;
-		Socket sock = null;
 		try {
-			servsock = new ServerSocket(SOCKET_PORT);
-			while (true) {
 				System.out.println("Waiting...");
 				try {
-					sock = servsock.accept();
-					System.out.println("Accepted connection : " + sock);
 					// send file
 					File myFile = new File (FILE_TO_SEND);
 					byte [] mybytearray  = new byte [(int)myFile.length()];
@@ -51,26 +52,17 @@ public class FileServer {
 					bis = new BufferedInputStream(fis);
 					// It read the bytes from the specified byte-input stream into a specified byte array
 					bis.read(mybytearray,0,mybytearray.length);
-					os = sock.getOutputStream();
-					System.out.println("Sending " + FILE_TO_SEND + "(" + mybytearray.length + " bytes)");
+					os = clientSocket.getOutputStream();
 					os.write(mybytearray,0,mybytearray.length);
 					os.flush();
 					System.out.println("Done.");
-				}
-				finally {
-					if (bis != null) bis.close();
-					if (os != null) os.close();
-					if (sock!=null) sock.close();
-				}
-			}
+				}catch(Exception e){}
+				
 		}
-		finally {
-			if (servsock != null) servsock.close();
-		}
+		catch(Exception e){}
   }
 
-  public void recieveFile() throws IOException{
-  	Socket sock = serverSocket.accept();
+  public void recieveFile(Socket clientSocket) throws IOException{
 	int bytesRead;
 		int current = 0;
 		FileOutputStream fos = null;
@@ -80,7 +72,7 @@ public class FileServer {
 
 			// receive file
 			byte [] mybytearray  = new byte [FILE_SIZE];
-			InputStream is = sock.getInputStream();
+			InputStream is = clientSocket.getInputStream();
 			fos = new FileOutputStream(FILE_TO_RECEIVED);
 			bos = new BufferedOutputStream(fos);
 			bytesRead = is.read(mybytearray,0,mybytearray.length);
@@ -93,10 +85,9 @@ public class FileServer {
 			} while(bytesRead > -1);
 
 			bos.write(mybytearray, 0 , current);
-			bos.flush();
 			System.out.println("File " + FILE_TO_RECEIVED
 					+ " downloaded (" + current + " bytes read)");
-		}catch(Exception e){}
+		}catch(Exception e){System.out.print(e);}
 		
 	}
 
